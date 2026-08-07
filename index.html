@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoneyPlan Builder — สร้างแผนเกษียณของคุณเอง</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#EDE9F7; --card:#FFFFFF; --ink:#111013; --sub:#6B6875;
+  --purple:#A78BFA; --purple-deep:#7C5CE0; --orange:#F6B44D; --blue:#AECBF5; --pink:#F3AEE4; --green:#8FD8A8; --red:#F08A8A;
+  --nav:#141318; --line:rgba(0,0,0,.12);
+}
+[data-theme="dark"]{
+  --bg:#141320; --card:#1F1D2E; --ink:#F4F2FA; --sub:#A5A1B5;
+  --purple:#6D4FC4; --purple-deep:#8B6FE8; --orange:#C98A2E; --blue:#4A6EA8; --pink:#B0679F; --green:#4E9A6B; --red:#C05B5B;
+  --nav:#0C0B12; --line:rgba(255,255,255,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Sukhumvit Set','Noto Sans Thai',Tahoma,system-ui,sans-serif}
+body{background:var(--bg);color:var(--ink);transition:background .3s,color .3s;padding-bottom:100px}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.avatar{width:46px;height:46px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px}
+.hgreet{text-align:center}
+.hgreet b{font-size:19px;display:block}
+.hgreet span{font-size:13px;color:var(--sub)}
+.mode{width:46px;height:46px;border-radius:50%;background:var(--card);border:none;font-size:19px;cursor:pointer}
+.hero{background:var(--purple);border-radius:28px;padding:26px 24px}
+.hero h1{font-size:clamp(24px,5vw,34px);font-weight:800;line-height:1.15;letter-spacing:-.5px}
+.hero p{margin-top:8px;font-size:14px;opacity:.85;font-weight:600}
+.hero .big{font-size:clamp(28px,6vw,42px);font-weight:800;margin-top:10px}
+.hero .big small{font-size:16px;font-weight:700}
+h2.sec{font-size:clamp(20px,4vw,26px);font-weight:800;margin:22px 0 12px;letter-spacing:-.4px}
+.card{border-radius:26px;padding:20px;background:var(--card);margin-bottom:14px}
+.grid{display:grid;gap:14px}
+@media(min-width:800px){.grid.cols{grid-template-columns:1.15fr 1fr}.grid.four{grid-template-columns:repeat(4,1fr)}.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:repeat(3,1fr)}}
+label.fl{font-size:13.5px;font-weight:700;display:block;margin-bottom:5px}
+.fhint{font-size:11.5px;color:var(--sub);font-weight:600;margin:-2px 0 8px}
+input[type=text],input[type=number],select{width:100%;padding:11px 13px;border-radius:14px;border:1.5px solid var(--line);font-family:inherit;font-size:14.5px;font-weight:600;background:var(--card);color:var(--ink);margin-bottom:12px}
+input:focus,select:focus{outline:none;border-color:var(--purple-deep)}
+.btn{border:none;background:var(--nav);color:#fff;padding:12px 20px;border-radius:18px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn.big{width:100%;padding:16px;font-size:16px;border-radius:20px}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{padding:8px 14px;font-size:13px;border-radius:13px}
+.rowline{display:grid;grid-template-columns:1fr 130px 40px;gap:8px;align-items:start}
+.rowline3{display:grid;grid-template-columns:1fr 90px 130px 40px;gap:8px;align-items:start}
+.rowline input,.rowline3 input{margin-bottom:8px}
+.xdel{border:none;background:transparent;color:var(--sub);cursor:pointer;font-size:17px;padding-top:10px}
+.metric{background:var(--card);border-radius:22px;padding:16px}
+.metric span{font-size:12.5px;color:var(--sub);font-weight:600}
+.metric b{display:block;font-size:clamp(17px,3vw,23px);font-weight:800;margin-top:4px}
+.slider-row{display:flex;align-items:center;gap:10px;margin:9px 0}
+.slider-row label{font-size:13px;font-weight:700;width:172px;flex-shrink:0;line-height:1.3}
+.slider-row output{font-size:14px;font-weight:800;min-width:78px;text-align:right}
+input[type=range]{flex:1;-webkit-appearance:none;height:8px;border-radius:6px;background:rgba(0,0,0,.15);outline:none}
+[data-theme="dark"] input[type=range]{background:rgba(255,255,255,.18)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--nav);cursor:pointer;border:3px solid #fff}
+[data-theme="dark"] input[type=range]::-webkit-slider-thumb{background:#fff;border-color:var(--nav)}
+details.drop{background:var(--card);border-radius:22px;margin:10px 0;overflow:hidden}
+details.drop summary{list-style:none;cursor:pointer;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:15px}
+details.drop summary::-webkit-details-marker{display:none}
+details.drop .body{padding:4px 20px 16px}
+.hint{font-size:11.5px;color:var(--sub);font-weight:600;margin:-4px 0 6px 182px}
+@media(max-width:600px){.hint{margin-left:0}}
+.noti{display:flex;gap:12px;align-items:flex-start;background:var(--card);border-radius:20px;padding:14px 16px;margin-bottom:10px}
+.dot{width:38px;height:38px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.noti b{font-size:14.5px;display:block}
+.noti span{font-size:13px;color:var(--sub)}
+.guru{border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.guru .head{display:flex;align-items:center;gap:12px}
+.gav{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0}
+[data-theme="dark"] .gav{background:rgba(0,0,0,.3)}
+.guru .head b{font-size:16.5px;display:block}
+.guru .head span{font-size:12.5px;opacity:.75;font-weight:600}
+.quote{font-size:14px;font-weight:600;line-height:1.6;min-height:88px;transition:opacity .18s}
+.fundrec{font-size:12.5px;font-weight:700;background:rgba(255,255,255,.5);border-radius:14px;padding:10px 12px;line-height:1.7}
+[data-theme="dark"] .fundrec{background:rgba(0,0,0,.25)}
+.fundrec em{font-style:normal;opacity:.75;font-weight:600}
+.chartbox{background:var(--card);border-radius:26px;padding:20px}
+nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--nav);border-radius:34px;display:flex;gap:6px;padding:8px;z-index:9}
+nav button{border:none;background:transparent;color:#8f8da0;width:56px;height:52px;border-radius:26px;font-size:20px;cursor:pointer}
+nav button.on{background:#fff;color:#111}
+.foot{font-size:11.5px;color:var(--sub);margin:26px 0 10px;line-height:1.7;text-align:center}
+.statusgood{color:#1E6B34}.statusbad{color:#B03020}
+[data-theme="dark"] .statusgood{color:#8FD8A8}[data-theme="dark"] .statusbad{color:#F08A8A}
+.c-orange{background:var(--orange)}.c-blue{background:var(--blue)}.c-pink{background:var(--pink)}.c-green{background:var(--green)}.c-purple{background:var(--purple)}
+.hide{display:none}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:9px 15px;border-radius:16px;border:1.5px solid var(--line);font-size:13.5px;font-weight:700;cursor:pointer;background:transparent;color:var(--ink);font-family:inherit}
+.chip.on{background:var(--nav);color:#fff;border-color:var(--nav)}
+table.log{width:100%;border-collapse:collapse;font-size:13.5px}
+table.log th{text-align:left;font-size:12px;color:var(--sub);padding:6px 8px;border-bottom:1.5px solid var(--line)}
+table.log td{padding:8px;border-bottom:1px solid var(--line);font-weight:600}
+table.log tr.msum td{background:rgba(124,92,224,.1);font-weight:800}
+.form-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.form-row input,.form-row select{margin-bottom:0;width:auto}
+.form-row input[type=number]{width:140px}
+</style>
+</head>
+<body data-theme="light">
+<div class="wrap">
+<header>
+  <div class="avatar" id="avatarBox">?</div>
+  <div class="hgreet"><b id="titleBox">MoneyPlan Builder</b><span id="today"></span></div>
+  <button class="mode" id="modeBtn" aria-label="สลับโหมดสว่าง/มืด">🌙</button>
+</header>
+
+<!-- ============ FORM ============ -->
+<section id="formView">
+<div class="hero" style="margin-bottom:16px">
+  <h1>สร้างแผนเกษียณ<br>ของคุณเอง</h1>
+  <p>กรอกข้อมูล 5 ขั้นตอน ประมาณ 7 นาที แล้วกดสร้าง — ได้ dashboard ส่วนตัวพร้อมกราฟจำลองกรณีตลาดแย่ และคำแนะนำจากกูรู 4 สำนัก ข้อมูลทั้งหมดเก็บอยู่ในเครื่องคุณเท่านั้น</p>
+</div>
+
+<div class="card">
+  <h2 class="sec" style="margin-top:0">1. ข้อมูลส่วนตัว</h2>
+  <label class="fl">ชื่อที่ใช้เรียก</label>
+  <input type="text" id="f_name" placeholder="เช่น เอก">
+  <label class="fl">อาชีพ</label>
+  <input type="text" id="f_job" placeholder="เช่น วิศวกร">
+  <div class="grid two">
+    <div>
+      <label class="fl">ปีเกิด (พ.ศ.)</label>
+      <input type="number" id="f_by" placeholder="2523">
+      <div class="fhint" id="ageHint">ระบบจะคำนวณอายุให้อัตโนมัติ</div>
+    </div>
+    <div>
+      <label class="fl">อายุที่อยากเกษียณ</label>
+      <input type="number" id="f_ret" value="60">
+      <div class="fhint">ถ้าตั้งใจทำงานไปเรื่อยๆ ใส่อายุที่คิดว่าจะทำไหวถึง</div>
+    </div>
+  </div>
+  <label class="fl">วางแผนใช้เงินถึงอายุ</label>
+  <input type="number" id="f_end" value="90">
+  <div class="fhint">แนะนำ 90 ขึ้นไป — วางแผนสั้นเกินไปอันตรายกว่ายาวเกินไป</div>
+  <label class="fl">ระดับความเสี่ยงที่รับได้</label>
+  <div class="chips" id="riskChips">
+    <button class="chip on" data-r="3.5">ต่ำ (~3.5%/ปี)</button>
+    <button class="chip" data-r="5">ปานกลาง (~5%/ปี)</button>
+    <button class="chip" data-r="6.5">สูง (~6.5%/ปี)</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2 class="sec" style="margin-top:0">2. รายได้ต่อเดือน (สุทธิหลังภาษี)</h2>
+  <div class="fhint" style="margin-bottom:10px">รายได้ไม่แน่นอน (ขายผลผลิต/ค่าเช่า/รับจ้าง) ให้ใส่ค่าเฉลี่ยทั้งปีหารด้วย 12</div>
+  <div id="incList"></div>
+  <button class="btn ghost sm" onclick="addRow('inc')">+ เพิ่มรายการรายได้</button>
+  <div style="margin-top:14px;font-weight:800;font-size:15px">รวมรายได้: <span id="incSum">0</span> บาท/เดือน</div>
+  <label class="fl" style="margin-top:16px">รายได้จากการทำงานนี้จะได้ถึงอายุเท่าไหร่</label>
+  <input type="number" id="f_workend" value="60">
+</div>
+
+<div class="card">
+  <h2 class="sec" style="margin-top:0">3. ค่าใช้จ่ายต่อเดือน</h2>
+  <div class="fhint" style="margin-bottom:10px">ใส่ให้ครบตามจริง รวมค่าผ่อนหนี้ เบี้ยประกัน ค่าดูแลพ่อแม่ ค่าเทอมลูก — ตัวเลขที่ต่ำกว่าจริงทำให้แผนดูดีเกินจริง</div>
+  <div id="expList"></div>
+  <button class="btn ghost sm" onclick="addRow('exp')">+ เพิ่มรายการค่าใช้จ่าย</button>
+  <div style="margin-top:14px;font-weight:800;font-size:15px">รวมค่าใช้จ่าย: <span id="expSum">0</span> บาท/เดือน</div>
+  <label class="fl" style="margin-top:16px">หลังเกษียณคาดว่าจะใช้เดือนละเท่าไหร่ (ค่าเงินวันนี้)</label>
+  <input type="number" id="f_retspend" placeholder="เช่น 30000">
+  <div class="fhint">ปกติ 60-80% ของวันนี้ — หักค่าผ่อนหนี้ที่จะหมดและค่าเลี้ยงลูกที่จะโตแล้ว</div>
+</div>
+
+<div class="card">
+  <h2 class="sec" style="margin-top:0">4. ค่าใช้จ่ายก้อนใหญ่ครั้งเดียว</h2>
+  <div class="fhint" style="margin-bottom:10px">สิ่งที่ทำให้แผนจริงพังบ่อยกว่าเงินเฟ้อ — ค่าเทอมมหาวิทยาลัยลูก เปลี่ยนรถ ซ่อมบ้าน งานแต่งลูก ค่ารักษาก้อนโต ทริปใหญ่ ใส่เป็นมูลค่าเงินวันนี้ ระบบจะปรับเงินเฟ้อให้เอง</div>
+  <div id="bigList"></div>
+  <button class="btn ghost sm" onclick="addBig()">+ เพิ่มค่าใช้จ่ายก้อนใหญ่</button>
+  <div style="margin-top:12px;font-weight:800;font-size:15px">รวม: <span id="bigSum">0</span> บาท</div>
+</div>
+
+<div class="card">
+  <h2 class="sec" style="margin-top:0">5. สินทรัพย์และหนี้สิน</h2>
+  <label class="fl">เงินลงทุน + เงินฝากที่มีตอนนี้ (บาท)</label>
+  <input type="number" id="f_port" placeholder="เช่น 500000">
+  <div class="fhint">เงินสด เงินฝาก กองทุน หุ้น ทอง — ไม่รวมที่ดิน/บ้าน</div>
+  <label class="fl">หนี้สินคงเหลือทั้งหมด (บาท)</label>
+  <input type="number" id="f_debt" value="0">
+  <label class="fl">ตั้งใจปลดหนี้ให้หมดภายในกี่ปี</label>
+  <input type="number" id="f_payoff" value="3">
+
+  <h3 style="font-size:16px;font-weight:800;margin:18px 0 6px">ที่ดิน / อสังหาฯ / สินทรัพย์ก้อนใหญ่</h3>
+  <div class="fhint">ใส่มูลค่าประเมิน + รายได้ต่อเดือนที่ได้จริง (ไม่มีใส่ 0) และติ๊กถ้าตั้งใจจะขาย พร้อมระบุอายุที่จะขาย</div>
+  <div id="assetList"></div>
+  <button class="btn ghost sm" onclick="addAsset()">+ เพิ่มสินทรัพย์</button>
+
+  <label class="fl" style="margin-top:18px">บำนาญ/รายได้ประจำหลังเกษียณ (บาท/เดือน)</label>
+  <input type="number" id="f_pen" value="0">
+  <div class="fhint">ประกันสังคม กบข. กองทุนสำรองเลี้ยงชีพ ประกันบำนาญ — ไม่รู้ตัวเลขใส่ 0 ไปก่อน ปรับทีหลังใน dashboard ได้</div>
+  <label class="fl">บำนาญเริ่มจ่ายตอนอายุ</label>
+  <input type="number" id="f_penage" value="60">
+</div>
+
+<button class="btn big" onclick="build()">สร้าง dashboard ของฉัน ✦</button>
+<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+  <button class="btn ghost sm" onclick="loadDemo()">ลองดูตัวอย่าง (นาย เอก วิศวกร)</button>
+  <button class="btn ghost sm" onclick="clearAll()">ล้างข้อมูลทั้งหมด</button>
+</div>
+<p class="foot">ข้อมูลนี้เป็นเพียงการวิเคราะห์เบื้องต้น ควรปรึกษาผู้เชี่ยวชาญด้านการเงินที่มีใบอนุญาตก่อนตัดสินใจลงทุน · ผลตอบแทนในอดีตไม่ได้การันตีอนาคต · ข้อมูลเก็บในเครื่องของคุณเท่านั้น (localStorage) ไม่มีการส่งออกไปที่ใด · แบบจำลองนี้ไม่คิดภาษี และไม่ปรับรายได้ตามเงินเฟ้อ ทำให้ผลลัพธ์ระมัดระวังกว่าความเป็นจริงเล็กน้อย</p>
+</section>
+
+<!-- ============ DASHBOARD ============ -->
+<section id="dashView" class="hide">
+<div class="grid cols">
+  <div class="hero">
+    <h1 id="dHead">—</h1>
+    <p id="dTarget">—</p>
+    <div class="big" id="dStatus">—</div>
+    <p id="dSub"></p>
+  </div>
+  <div class="grid" style="grid-template-columns:1fr 1fr;align-content:start">
+    <div class="metric"><span>เงินออมได้/เดือน</span><b id="mSave">—</b></div>
+    <div class="metric"><span>กระแสเงินสดติดลบตอนอายุ</span><b id="mNeg">—</b></div>
+    <div class="metric"><span>พอร์ต ณ วันเกษียณ</span><b id="mPot">—</b></div>
+    <div class="metric"><span>กรณีตลาดแย่ อยู่ถึงอายุ</span><b id="mBad">—</b></div>
+  </div>
+</div>
+
+<h2 class="sec">เครื่องจำลองแผน</h2>
+<div class="card">
+  <div class="slider-row"><label>💼 รายได้ทำงาน/เดือน</label><input type="range" id="s_inc" min="0" max="100000" step="1000"><output id="o_inc">0</output></div>
+  <div class="slider-row"><label>🛒 ค่าใช้จ่ายวันนี้/เดือน</label><input type="range" id="s_exp" min="0" max="100000" step="1000"><output id="o_exp">0</output></div>
+  <div class="slider-row"><label>🌴 ใช้จ่ายหลังเกษียณ/เดือน</label><input type="range" id="s_rspend" min="0" max="100000" step="1000"><output id="o_rspend">0</output></div>
+  <div class="slider-row"><label>🎯 อายุเกษียณ</label><input type="range" id="s_ret" min="45" max="75" step="1"><output id="o_ret">0</output></div>
+  <div class="slider-row"><label>🏦 บำนาญ/รายได้ประจำหลังเกษียณ</label><input type="range" id="s_pen" min="0" max="60000" step="500"><output id="o_pen">0</output></div>
+  <div class="slider-row"><label>📈 ผลตอบแทนพอร์ต %</label><input type="range" id="s_r" min="2" max="8" step="0.25"><output id="o_r">0</output></div>
+  <div class="slider-row"><label>💨 เงินเฟ้อ %</label><input type="range" id="s_inf" min="1.5" max="5" step="0.25" value="3"><output id="o_inf">3.0%</output></div>
+</div>
+
+<details class="drop" id="assetDrop">
+  <summary>🏠 รายได้จากสินทรัพย์ รวม/เดือน<span><span id="rentTotal">0</span> ฿ ▼</span></summary>
+  <div class="body" id="assetSliders"></div>
+</details>
+
+<details class="drop" id="bigDrop">
+  <summary>💥 ค่าใช้จ่ายก้อนใหญ่<span><span id="bigCount">0</span> รายการ ▼</span></summary>
+  <div class="body" id="bigSliders"></div>
+</details>
+
+<h2 class="sec">เส้นทางพอร์ตการเงิน</h2>
+<div class="chartbox">
+  <div style="display:flex;gap:16px;font-size:12px;color:var(--sub);margin-bottom:6px;font-weight:600;flex-wrap:wrap">
+    <span>— กรณีปกติ</span><span style="color:#E24B4A">- - กรณีตลาดแย่</span><span style="color:#E24B4A">◆ เป้าเงินก้อน</span>
+  </div>
+  <div style="position:relative;height:290px"><canvas id="pathChart"></canvas></div>
+  <div class="slider-row" style="margin-top:12px"><label>⚠️ ตลาดร่วงปีที่เกษียณ</label><input type="range" id="s_shock" min="0" max="40" step="5" value="20"><output id="o_shock">-20%</output></div>
+  <div class="slider-row"><label>⚠️ ผลตอบแทนต่ำกว่าปกติ</label><input type="range" id="s_drag" min="0" max="3" step="0.25" value="1.5"><output id="o_drag">-1.5%</output></div>
+  <div class="hint">ตลาดร่วงแรงช่วง 2-3 ปีรอบวันเกษียณคือความเสี่ยงที่อันตรายที่สุด เพราะพอร์ตใหญ่ที่สุดและต้องเริ่มถอนพอดี — ถ้าเส้นประยังไม่ตกถึงศูนย์ แปลว่าแผนมีกันชนพอ</div>
+  <p style="font-size:12.5px;color:var(--sub);margin-top:8px;font-weight:600" id="chartNote"></p>
+</div>
+
+<h2 class="sec">📒 สมุดบันทึกการลงทุนรายเดือน</h2>
+<div class="card">
+  <div class="form-row">
+    <input type="month" id="logMonth">
+    <select id="logCat">
+      <option>เงินสำรอง/ตลาดเงิน</option><option>กองทุนตราสารหนี้</option><option>พันธบัตรออมทรัพย์</option>
+      <option>กองทุนผสม</option><option>กองทุนหุ้น/ดัชนี</option><option>ทองคำ</option>
+      <option>RMF/Thai ESG</option><option>ประกันบำนาญ</option><option>โปะหนี้</option><option>อื่นๆ</option>
+    </select>
+    <input type="number" id="logAmt" placeholder="จำนวนเงิน" min="0" step="100">
+    <button class="btn sm" onclick="addLog()">บันทึก +</button>
+  </div>
+  <div class="grid three" style="margin-bottom:14px">
+    <div class="metric" style="background:var(--bg)"><span>เดือนล่าสุด</span><b id="sumThis">—</b></div>
+    <div class="metric" style="background:var(--bg)"><span>เทียบเป้าออม</span><b id="sumPct">—</b></div>
+    <div class="metric" style="background:var(--bg)"><span>รวมสะสม</span><b id="sumAll">—</b></div>
+  </div>
+  <div style="overflow-x:auto"><table class="log" id="logTable"></table></div>
+</div>
+
+<h2 class="sec">การแจ้งเตือน</h2>
+<div id="notiList"></div>
+
+<h2 class="sec" id="guruHead">กูรู 4 สำนัก: คำแนะนำสำหรับคุณ</h2>
+<p style="font-size:13px;color:var(--sub);margin:-6px 0 12px;font-weight:600">คำแนะนำจำลองตามแนวคิดสาธารณะของแต่ละท่าน (AI-generated) หมุนเวียนรายเดือน · กดปุ่มขอคำแนะนำใหม่ได้</p>
+<div class="grid four" id="guruGrid"></div>
+
+<div style="display:flex;gap:8px;margin-top:22px;flex-wrap:wrap">
+  <button class="btn ghost sm" onclick="editData()">← แก้ไขข้อมูล</button>
+  <button class="btn ghost sm" onclick="exportFile()">💾 บันทึกไฟล์ dashboard ของฉัน</button>
+  <button class="btn ghost sm" onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button>
+</div>
+<p class="foot">ข้อมูลนี้เป็นเพียงการวิเคราะห์เบื้องต้น ควรปรึกษาผู้เชี่ยวชาญด้านการเงินที่มีใบอนุญาตก่อนตัดสินใจลงทุน · ผลตอบแทนในอดีตไม่ได้การันตีอนาคต · คำแนะนำของกูรูเป็นการจำลองตามแนวคิดสาธารณะ ไม่ใช่คำพูดจริงของบุคคล · แบบจำลองไม่คิดภาษีและไม่ปรับรายได้ตามเงินเฟ้อ</p>
+</section>
+</div>
+
+<nav>
+  <button class="on" onclick="scrollTo({top:0,behavior:'smooth'})">⌂</button>
+  <button onclick="document.getElementById('guruHead')?.scrollIntoView({behavior:'smooth'})">✦</button>
+  <button onclick="document.getElementById('pathChart')?.scrollIntoView({behavior:'smooth'})">📊</button>
+  <button onclick="toggleMode()">◐</button>
+</nav>
+
+<script>
+const el=i=>document.getElementById(i);
+const fmt=v=>Math.round(v||0).toLocaleString('th-TH');
+const fmtM=v=>(v/1e6).toFixed(1)+' ล้าน';
+const now=new Date();
+el('today').textContent=now.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
+function toggleMode(){
+  const b=document.body,d=b.dataset.theme==='dark';
+  b.dataset.theme=d?'light':'dark';
+  el('modeBtn').textContent=d?'🌙':'☀️';
+  if(D)calc(true);
+}
+el('modeBtn').onclick=toggleMode;
+
+let incRows=[],expRows=[],assetRows=[],bigRows=[],risk=3.5,D=null;
+const KEY='mp_builder_profile';
+
+function addRow(kind,name='',amt=''){
+  (kind==='inc'?incRows:expRows).push({id:Date.now()+Math.random(),name,amt});
+  renderRows(kind);
+}
+function renderRows(kind){
+  const arr=kind==='inc'?incRows:expRows;
+  const ph=kind==='inc'?'เช่น ขายผลผลิต':'เช่น ค่ากินอยู่';
+  el(kind==='inc'?'incList':'expList').innerHTML=arr.map(r=>`<div class="rowline">
+    <input type="text" placeholder="${ph}" value="${(r.name||'').replace(/"/g,'&quot;')}" oninput="upd('${kind}','${r.id}','name',this.value)">
+    <input type="number" placeholder="บาท/เดือน" value="${r.amt}" oninput="upd('${kind}','${r.id}','amt',this.value)">
+    <button class="xdel" onclick="delRow('${kind}','${r.id}')">✕</button></div>`).join('');
+  sums();
+}
+function upd(kind,id,f,v){
+  const r=(kind==='inc'?incRows:expRows).find(x=>String(x.id)===String(id)); if(r){r[f]=v;sums();}
+}
+function delRow(kind,id){
+  if(kind==='inc')incRows=incRows.filter(x=>String(x.id)!==String(id));
+  else expRows=expRows.filter(x=>String(x.id)!==String(id));
+  renderRows(kind);
+}
+function sums(){
+  el('incSum').textContent=fmt(incRows.reduce((s,r)=>s+(+r.amt||0),0));
+  el('expSum').textContent=fmt(expRows.reduce((s,r)=>s+(+r.amt||0),0));
+}
+function addBig(name='',age='',amt=''){
+  bigRows.push({id:Date.now()+Math.random(),name,age,amt});renderBig();
+}
+function renderBig(){
+  el('bigList').innerHTML=bigRows.map(r=>`<div class="rowline3">
+    <input type="text" placeholder="เช่น ค่าเทอมมหาลัยลูก" value="${(r.name||'').replace(/"/g,'&quot;')}" oninput="updB('${r.id}','name',this.value)">
+    <input type="number" placeholder="ตอนอายุ" value="${r.age}" oninput="updB('${r.id}','age',this.value)">
+    <input type="number" placeholder="บาท" value="${r.amt}" oninput="updB('${r.id}','amt',this.value)">
+    <button class="xdel" onclick="delB('${r.id}')">✕</button></div>`).join('');
+  el('bigSum').textContent=fmt(bigRows.reduce((s,r)=>s+(+r.amt||0),0));
+}
+function updB(id,f,v){const r=bigRows.find(x=>String(x.id)===String(id));if(r){r[f]=v;el('bigSum').textContent=fmt(bigRows.reduce((s,x)=>s+(+x.amt||0),0));}}
+function delB(id){bigRows=bigRows.filter(x=>String(x.id)!==String(id));renderBig();}
+function addAsset(name='',val='',rent='',sell=false,sellage=''){
+  assetRows.push({id:Date.now()+Math.random(),name,val,rent,sell,sellage});renderAssets();
+}
+function renderAssets(){
+  el('assetList').innerHTML=assetRows.map(r=>`<div style="border:1.5px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <input type="text" placeholder="เช่น ที่ดิน 10 ไร่" value="${(r.name||'').replace(/"/g,'&quot;')}" style="margin-bottom:0" oninput="updA('${r.id}','name',this.value)">
+      <button class="xdel" onclick="delA('${r.id}')" style="padding-top:0">✕</button></div>
+    <div class="grid two" style="gap:8px">
+      <div><label class="fl" style="font-size:12px">มูลค่าประเมิน (บาท)</label><input type="number" value="${r.val}" oninput="updA('${r.id}','val',this.value)"></div>
+      <div><label class="fl" style="font-size:12px">รายได้/ค่าเช่า (บาท/เดือน)</label><input type="number" value="${r.rent}" oninput="updA('${r.id}','rent',this.value)"></div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;font-size:13px;font-weight:700">
+      <input type="checkbox" ${r.sell?'checked':''} onchange="updA('${r.id}','sell',this.checked)" style="width:17px;height:17px">
+      <span>ตั้งใจขายตอนอายุ</span>
+      <input type="number" placeholder="เช่น 60" value="${r.sellage}" style="width:100px;margin-bottom:0" oninput="updA('${r.id}','sellage',this.value)">
+    </div></div>`).join('');
+}
+function updA(id,f,v){const r=assetRows.find(x=>String(x.id)===String(id));if(r)r[f]=v;}
+function delA(id){assetRows=assetRows.filter(x=>String(x.id)!==String(id));renderAssets();}
+
+document.querySelectorAll('#riskChips .chip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('#riskChips .chip').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on'); risk=+c.dataset.r;
+});
+el('f_by').addEventListener('input',()=>{
+  const by=+el('f_by').value;
+  el('ageHint').textContent=(by>2400&&by<2600)?('อายุปัจจุบันประมาณ '+(2569-by)+' ปี'):'ระบบจะคำนวณอายุให้อัตโนมัติ';
+});
+
+function loadDemo(){
+  el('f_name').value='เอก';el('f_job').value='วิศวกร';el('f_by').value=2524;el('f_ret').value=60;el('f_end').value=90;
+  el('f_workend').value=60;el('f_retspend').value=40000;el('f_port').value=1200000;el('f_debt').value=1500000;
+  el('f_payoff').value=5;el('f_pen').value=12000;el('f_penage').value=60;
+  incRows=[];expRows=[];assetRows=[];bigRows=[];
+  addRow('inc','เงินเดือนสุทธิ',75000); addRow('inc','โบนัสเฉลี่ยต่อเดือน',15000);
+  addRow('exp','ค่ากินอยู่ในบ้าน',20000); addRow('exp','ผ่อนบ้าน',18000);
+  addRow('exp','ค่าเทอมลูก',8000); addRow('exp','ค่ารถ + น้ำมัน',7000);
+  addRow('exp','เบี้ยประกันสุขภาพ/ชีวิต',6000);
+  addAsset('คอนโดปล่อยเช่า',2000000,9000,false,''); addAsset('ที่ดินเปล่าต่างจังหวัด',800000,0,false,'');
+  addBig('ค่าเทอมมหาวิทยาลัยลูก',50,400000); addBig('เปลี่ยนรถ',55,700000);
+  el('f_by').dispatchEvent(new Event('input'));
+  alert('ใส่ตัวอย่าง "นาย เอก วิศวกร" ให้แล้ว — แก้เป็นของตัวเองได้เลย แล้วกดสร้าง dashboard');
+}
+function clearAll(){
+  if(!confirm('ล้างข้อมูลทั้งหมดที่กรอกไว้?'))return;
+  localStorage.removeItem(KEY);location.reload();
+}
+function collect(){
+  const by=+el('f_by').value;
+  return {name:el('f_name').value||'คุณ', job:el('f_job').value||'',
+    age:(by>2400&&by<2600)?(2569-by):45, by,
+    ret:+el('f_ret').value||60, end:+el('f_end').value||90, workend:+el('f_workend').value||60,
+    risk, inc:incRows, exp:expRows, assets:assetRows, big:bigRows,
+    retspend:+el('f_retspend').value||0, port:+el('f_port').value||0, debt:+el('f_debt').value||0,
+    payoff:Math.max(+el('f_payoff').value||1,1), pen:+el('f_pen').value||0, penage:+el('f_penage').value||60};
+}
+function build(){
+  const d=collect();
+  if(!d.by||d.by<2400||d.by>2600){alert('กรุณาใส่ปีเกิดเป็น พ.ศ. เช่น 2523');return;}
+  if(!d.retspend){alert('กรุณาใส่ค่าใช้จ่ายหลังเกษียณต่อเดือน');return;}
+  D=d; localStorage.setItem(KEY,JSON.stringify(d)); renderDash();
+}
+function editData(){el('dashView').classList.add('hide');el('formView').classList.remove('hide');scrollTo({top:0});}
+
+function renderDash(){
+  el('formView').classList.add('hide'); el('dashView').classList.remove('hide'); scrollTo({top:0});
+  el('avatarBox').textContent=D.name.slice(0,2);
+  el('titleBox').textContent='สวัสดี, '+D.name;
+  el('dHead').innerHTML='ภารกิจเกษียณ '+D.ret+'<br>ใช้เงินถึงอายุ '+D.end;
+  const incTot=D.inc.reduce((s,r)=>s+(+r.amt||0),0);
+  const expTot=D.exp.reduce((s,r)=>s+(+r.amt||0),0);
+  const set=(id,v,mx)=>{const s=el(id);s.max=Math.max(mx,(v||0)*2||10000);s.value=v;};
+  set('s_inc',incTot,200000); set('s_exp',expTot,200000); set('s_rspend',D.retspend,200000);
+  el('s_ret').value=D.ret; el('s_pen').value=D.pen; el('s_pen').max=Math.max(60000,D.pen*2); el('s_r').value=D.risk;
+  el('assetSliders').innerHTML=D.assets.length?D.assets.map((a,i)=>
+    `<div class="slider-row"><label>🏞️ ${a.name||'สินทรัพย์ '+(i+1)}</label>
+     <input type="range" class="asl" id="as_${i}" min="0" max="${Math.max(50000,(+a.rent||0)*3)}" step="500" value="${+a.rent||0}"><output id="aso_${i}">${fmt(a.rent)}</output></div>
+     <div class="hint">มูลค่า ${fmt(a.val)} บาท${a.sell?(' · ตั้งใจขายตอนอายุ '+(a.sellage||D.ret)):((+a.rent||0)===0?' · ยังไม่สร้างรายได้ ลากดูว่าถ้าปล่อยเช่าได้จะเปลี่ยนแผนแค่ไหน':'')}
+     <label style="display:inline-flex;gap:5px;align-items:center;margin-left:8px;width:auto"><input type="checkbox" class="asell" id="asell_${i}" ${a.sell?'checked':''} style="width:15px;height:15px">ขาย</label></div>`
+  ).join(''):'<div class="hint" style="margin-left:0">ยังไม่ได้ใส่สินทรัพย์ — กดแก้ไขข้อมูลเพื่อเพิ่ม</div>';
+  el('bigCount').textContent=D.big.length;
+  el('bigSliders').innerHTML=D.big.length?D.big.map((b,i)=>
+    `<div class="slider-row"><label>💥 ${b.name||'รายการ '+(i+1)} (อายุ ${b.age||'-'})</label>
+     <input type="range" class="bsl" id="bs_${i}" min="0" max="${Math.max(500000,(+b.amt||0)*2)}" step="10000" value="${+b.amt||0}"><output id="bso_${i}">${fmt(b.amt)}</output></div>`
+  ).join(''):'<div class="hint" style="margin-left:0">ยังไม่ได้ใส่ค่าใช้จ่ายก้อนใหญ่ — กดแก้ไขข้อมูลเพื่อเพิ่ม (ค่าเทอมลูก เปลี่ยนรถ ซ่อมบ้าน)</div>';
+  D.assets.forEach((a,i)=>{['as_'+i,'asell_'+i].forEach(id=>el(id)&&el(id).addEventListener('input',()=>calc(false)));});
+  D.big.forEach((b,i)=>{const s=el('bs_'+i);if(s)s.addEventListener('input',()=>calc(false));});
+  ['s_inc','s_exp','s_rspend','s_ret','s_pen','s_r','s_inf','s_shock','s_drag'].forEach(i=>el(i).addEventListener('input',()=>calc(false)));
+  el('logMonth').value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  renderLog(); renderGurus(); calc(true);
+}
+
+function project(o,stress){
+  const A0=D.age,END=D.end,G=0.02;
+  let bal=D.port, path=[], runout=null, pot=null, negAge=null, ages=[];
+  for(let age=A0;age<END;age++){
+    const t=age-A0;
+    const working=age<Math.min(D.workend,o.ret);
+    const e=(age<o.ret?o.exp:o.rspend)*12*Math.pow(1+o.inf,t);
+    let rent=0;
+    o.assets.forEach(a=>{ if(!(a.sell&&age>=a.sellage)) rent+=a.rent; });
+    const rn=rent*12*Math.pow(1+G,t);
+    const income=(working?o.inc*12:0)+(age>=D.penage?o.pen*12:0);
+    let big=0;
+    o.big.forEach(b=>{ if(+b.age===age) big+=b.amt*Math.pow(1+o.inf,t); });
+    const dp=(t<D.payoff)?D.debt/D.payoff:0;
+    o.assets.forEach(a=>{ if(a.sell&&+a.sellage===age) bal+=a.val*Math.pow(1+G,t); });
+    let r=o.r;
+    if(stress){ r-=stress.drag/100; if(age===o.ret) bal*=(1-stress.shock/100); }
+    const cf=income+rn-e-big;
+    if(cf<0&&negAge===null&&age<o.ret)negAge=age;
+    bal=(bal+cf-dp)*(1+r);
+    if(age===o.ret-1)pot=bal;
+    if(bal<=0&&runout===null)runout=age+1;
+    ages.push(age+1); path.push(Math.max(bal/1e6,0));
+  }
+  return {path,ages,runout,pot:pot??D.port,negAge};
+}
+
+let chart=null;
+function calc(rebuild){
+  const o={inc:+el('s_inc').value, exp:+el('s_exp').value, rspend:+el('s_rspend').value,
+    ret:+el('s_ret').value, pen:+el('s_pen').value, r:+el('s_r').value/100, inf:+el('s_inf').value/100,
+    assets:D.assets.map((a,i)=>({rent:+(el('as_'+i)?.value||0), val:+a.val||0,
+      sell:el('asell_'+i)?el('asell_'+i).checked:!!a.sell, sellage:+(a.sellage||el('s_ret').value)})),
+    big:D.big.map((b,i)=>({age:+b.age||0, amt:+(el('bs_'+i)?.value||0)}))};
+  el('o_inc').textContent=fmt(o.inc);el('o_exp').textContent=fmt(o.exp);el('o_rspend').textContent=fmt(o.rspend);
+  el('o_ret').textContent=o.ret;el('o_pen').textContent=fmt(o.pen);
+  el('o_r').textContent=(o.r*100).toFixed(2).replace(/0+$/,'').replace(/\.$/,'')+'%';
+  el('o_inf').textContent=(o.inf*100).toFixed(1)+'%';
+  const shock=+el('s_shock').value, drag=+el('s_drag').value;
+  el('o_shock').textContent='-'+shock+'%'; el('o_drag').textContent='-'+drag.toFixed(2).replace(/0$/,'')+'%';
+  let rent=0;
+  o.assets.forEach((a,i)=>{rent+=a.rent; if(el('aso_'+i))el('aso_'+i).textContent=fmt(a.rent);});
+  o.big.forEach((b,i)=>{if(el('bso_'+i))el('bso_'+i).textContent=fmt(b.amt);});
+  el('rentTotal').textContent=fmt(rent);
+
+  const save=o.inc+rent-o.exp;
+  el('mSave').textContent=(save>=0?'+':'−')+fmt(Math.abs(save))+' ฿';
+  el('mSave').className=save>=0?'statusgood':'statusbad';
+  window._save=save;
+
+  const base=project(o,null), bad=project(o,{shock,drag});
+  el('mPot').textContent=fmtM(base.pot);
+  el('mNeg').textContent=base.negAge?base.negAge+' ปี':'ไม่ติดลบ';
+  el('mBad').textContent=bad.runout?bad.runout+' ปี':'เกิน '+D.end;
+  el('mBad').className=bad.runout?'statusbad':'statusgood';
+
+  let lump=0;
+  for(let y=0;y<D.end-o.ret;y++){
+    const age=o.ret+y;
+    const sp=o.rspend*12*Math.pow(1+o.inf,age-D.age);
+    let rn=0; o.assets.forEach(a=>{ if(!(a.sell&&age>=a.sellage)) rn+=a.rent*12*Math.pow(1.02,age-D.age); });
+    const pn=age>=D.penage?o.pen*12:0;
+    lump+=Math.max(sp-rn-pn,0)/Math.pow(1+o.r,y+0.5);
+  }
+  el('dTarget').textContent='เป้าเงินก้อน ณ อายุ '+o.ret+': '+fmtM(lump)+' บาท (ใช้ '+fmt(o.rspend)+'/เดือนค่าเงินวันนี้ + เงินเฟ้อ '+(o.inf*100).toFixed(1)+'%)';
+  el('dStatus').innerHTML=base.runout?('หมดตอน '+base.runout+' <small>ปี ✗</small>'):('ถึง '+D.end+' ✓');
+  el('dSub').textContent=base.runout
+    ?'ขาดอีก '+(D.end-base.runout)+' ปี — ลองเพิ่มรายได้จากสินทรัพย์ เลื่อนอายุเกษียณ หรือลดค่าใช้จ่ายหลังเกษียณ'
+    :'เหลือปลายแผน '+fmtM(base.path[base.path.length-1]*1e6)+(bad.runout?(' · แต่กรณีตลาดแย่จะหมดตอนอายุ '+bad.runout):' · ทนกรณีตลาดแย่ได้ด้วย ✓');
+  el('chartNote').textContent='ข้อมูลของ '+D.name+(D.job?' ('+D.job+')':'')+' · อายุ '+D.age+' · พอร์ตตั้งต้น '+fmt(D.port)+' · หนี้ '+fmt(D.debt)+' โปะใน '+D.payoff+' ปี · รายได้ทำงานถึงอายุ '+D.workend+' · บำนาญเริ่มอายุ '+D.penage+' · มูลค่าที่ดิน/อสังหาฯ นับเข้าพอร์ตเฉพาะรายการที่ติ๊กว่าจะขาย';
+
+  const tgt=base.ages.map(a=>a===o.ret?lump/1e6:null);
+  const dark=document.body.dataset.theme==='dark';
+  if(chart&&!rebuild){
+    chart.data.labels=base.ages;chart.data.datasets[0].data=base.path;
+    chart.data.datasets[1].data=bad.path;chart.data.datasets[2].data=tgt;chart.update('none');
+  }else{
+    if(chart)chart.destroy();
+    chart=new Chart(el('pathChart'),{type:'line',
+     data:{labels:base.ages,datasets:[
+      {data:base.path,borderColor:'#7C5CE0',backgroundColor:'rgba(124,92,224,.15)',fill:true,pointRadius:0,borderWidth:2.5,tension:.25},
+      {data:bad.path,borderColor:'#E24B4A',borderDash:[6,4],pointRadius:0,borderWidth:2,fill:false,tension:.25},
+      {data:tgt,borderColor:'#E24B4A',pointRadius:6,pointStyle:'rectRot',showLine:false}]},
+     options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>'อายุ '+c[0].label,
+        label:c=>(c.datasetIndex===0?'ปกติ: ':c.datasetIndex===1?'ตลาดแย่: ':'เป้า: ')+c.parsed.y.toFixed(1)+' ล้าน'}}},
+      scales:{x:{ticks:{color:dark?'#A5A1B5':'#6B6875',maxTicksLimit:12},grid:{display:false}},
+              y:{ticks:{color:dark?'#A5A1B5':'#6B6875',callback:v=>v+'M'},grid:{color:dark?'rgba(255,255,255,.07)':'rgba(0,0,0,.06)'}}}}});
+  }
+  renderNoti(o,base,bad,rent,save);
+}
+
+function renderNoti(o,base,bad,rent,save){
+  const expTot=o.exp;
+  const idle=D.assets.filter((a,i)=>o.assets[i].rent===0&&(+a.val||0)>0);
+  const risky=(D.job||'').match(/เกษตร|ค้า|อิสระ|ขาย|รับจ้าง|ฟรีแลนซ์/);
+  const n=[];
+  n.push(['💰','var(--orange)','เงินสำรองฉุกเฉิน','เป้า '+fmt(expTot*(risky?12:6))+' บาท ('+(risky?12:6)+' เดือนของค่าใช้จ่าย)'+(risky?' — อาชีพรายได้ไม่แน่นอนควรมีหนากว่าปกติ':'')+' · ปัจจุบันมีพอร์ตรวม '+fmt(D.port)+' บาท']);
+  if(D.debt>0)n.push(['🏦','var(--red)','ปลดหนี้ '+fmt(D.debt)+' บาท ใน '+D.payoff+' ปี','ดอกเบี้ยหนี้มักสูงกว่าผลตอบแทนการลงทุน — โปะหนี้คือการลงทุนที่การันตีผลตอบแทน']);
+  if(D.big.length)n.push(['💥','var(--purple)','ค่าใช้จ่ายก้อนใหญ่ '+D.big.length+' รายการ',D.big.map(b=>b.name+' (อายุ '+b.age+')').join(' · ')+' — เตรียมเงินก้อนแยกไว้ก่อนถึงเวลา อย่าดึงจากพอร์ตหลักตอนตลาดแย่']);
+  if(idle.length)n.push(['🏞️','var(--green)','สินทรัพย์ที่ยังไม่สร้างรายได้ '+idle.length+' รายการ',idle.map(a=>a.name).join(', ')+' มูลค่ารวม '+fmt(idle.reduce((s,a)=>s+(+a.val||0),0))+' บาท — ให้เช่า ทำประโยชน์ หรือขายมาลงทุน']);
+  if(save<=0)n.push(['⚠️','var(--red)','รายจ่ายมากกว่ารายได้','ติดลบเดือนละ '+fmt(Math.abs(save))+' บาท — ต้องแก้ก่อนเรื่องลงทุนใดๆ']);
+  else n.push(['✅','var(--green)','ออมได้เดือนละ '+fmt(save)+' บาท','คิดเป็น '+(o.inc+rent?Math.round(save/(o.inc+rent)*100):0)+'% ของรายได้ — เกณฑ์ที่ดีคือ 20% ขึ้นไป']);
+  if(bad.runout)n.push(['📉','var(--orange)','กรณีตลาดแย่: เงินหมดตอนอายุ '+bad.runout,'ต่างจากกรณีปกติ '+(base.runout?(bad.runout-base.runout)*-1*-1:D.end-bad.runout)+' ปี — ทางแก้คือถือเงินสด+ตราสารหนี้ 2-3 ปีของค่าใช้จ่ายไว้ก่อนเกษียณ จะได้ไม่ต้องขายสินทรัพย์ตอนราคาต่ำ']);
+  n.push(['🛡️','var(--blue)','ประกันสุขภาพ','ค่ารักษาก้อนเดียวทำลายแผนทั้งแผนได้ — ยิ่งอายุน้อยเบี้ยยิ่งถูก']);
+  n.push(['📜','var(--pink)','พินัยกรรมและแผนส่งต่อ','มีที่ดิน/อสังหาฯ ควรระบุการแบ่งให้ชัดตั้งแต่วันนี้']);
+  el('notiList').innerHTML=n.map(x=>`<div class="noti"><div class="dot" style="background:${x[1]}">${x[0]}</div><div><b>${x[2]}</b><span>${x[3]}</span></div></div>`).join('');
+}
+
+const GURUS=[
+ {id:'bogle',name:'John Bogle',sub:'บิดา Index Fund',color:'c-blue',init:'JB',
+  advice:['อย่ามองหาเข็มในกองฟาง ซื้อกองฟางทั้งกอง — กองทุนดัชนีค่าธรรมเนียมต่ำชนะกองที่พยายามเอาชนะตลาดในระยะยาว',
+   'ผลตอบแทนของคุณ = ตลาด ลบ ค่าธรรมเนียม เช็ค TER ทุกกองก่อนซื้อ ต่างกัน 1% ต่อปีคือเงินมหาศาลใน 20 ปี',
+   'อย่าทำอะไรเลย แค่ยืนอยู่ตรงนั้น — ตลาดผันผวนไม่ใช่เหตุผลให้หยุดลงทุนสม่ำเสมอทุกเดือน',
+   'เวลาในตลาดชนะการจับจังหวะตลาดเสมอ เริ่มเดือนนี้ดีกว่ารอจังหวะดีที่ไม่มีวันมา'],
+  fund:'<em>แนวทาง:</em> กองทุนดัชนีและกองตราสารหนี้ค่าธรรมเนียมต่ำ ลงทุนสม่ำเสมอทุกเดือน (DCA) ไม่จับจังหวะ'},
+ {id:'buffett',name:'Warren Buffett',sub:'Value Investing',color:'c-orange',init:'WB',
+  advice:['สินทรัพย์ที่ดีต้องผลิตกระแสเงินสด — ที่ดินหรือบ้านที่ไม่สร้างรายได้คือก้อนหินราคาแพงที่ต้องจ่ายภาษีทุกปี',
+   'กฎข้อ 1 อย่าขาดทุน กฎข้อ 2 อย่าลืมกฎข้อ 1 — เงินสำรองและประกันสุขภาพต้องมาก่อนการลงทุนทุกบาท',
+   'อย่าลงทุนในสิ่งที่ไม่เข้าใจ ถ้าอธิบายให้ลูกฟังไม่ได้ว่ามันทำเงินอย่างไร แปลว่ายังไม่ควรซื้อ',
+   'ลงทุนในตัวเองให้ผลตอบแทนสูงที่สุด — ทักษะและความรู้ในอาชีพไม่มีใครยึดไปได้'],
+  fund:'<em>แนวทาง:</em> วัดทุกสินทรัพย์ด้วยผลตอบแทนจริงต่อปี ต่ำกว่า 3-4% ต่อเนื่องให้พิจารณาเปลี่ยนเป็นสิ่งที่ผลิตเงินสดดีกว่า'},
+ {id:'dalio',name:'Ray Dalio',sub:'All-Weather Portfolio',color:'c-purple',init:'RD',
+  advice:['อย่าใส่ไข่ทั้งหมดในตะกร้าใบเดียว — กระจายทั้งประเภทสินทรัพย์และแหล่งรายได้ ให้รอดทุกสภาวะเศรษฐกิจ',
+   'เงินเฟ้อคือศัตรูเงียบ — เงินสดที่นอนเฉยแพ้เงินเฟ้อทุกปี สินทรัพย์จริงอย่างทองคำและที่ดินคือเกราะ',
+   'ทดสอบแผนด้วยสถานการณ์เลวร้าย — ลากสไลเดอร์ "ตลาดร่วงปีที่เกษียณ" ไป 40% ถ้าเส้นประยังไม่ตกถึงศูนย์ แผนคุณแกร่งจริง',
+   'ความเจ็บปวด + การไตร่ตรอง = ความก้าวหน้า ทบทวนแผนปีละครั้ง เขียนสิ่งที่เรียนรู้ลงกระดาษ'],
+  fund:'<em>แนวทาง All-Weather:</em> ตราสารหนี้เป็นแกน + หุ้น/กองผสมส่วนหนึ่ง + ทองคำ 5-10% + เงินสดสำรอง'},
+ {id:'coach',name:'โค้ชหนุ่ม จักรพงษ์',sub:'Money Coach ประเทศไทย',color:'c-green',init:'คน',
+  advice:['อิสรภาพทางการเงิน = ทรัพย์สินสร้างรายได้มากกว่ารายจ่าย ไม่ใช่การมีเงินเยอะ นับถอยหลังจากตัวเลขนี้',
+   'จ่ายให้ตัวเองก่อน — แบ่งเงินออมออกทันทีที่รายได้เข้า แล้วค่อยใช้ส่วนที่เหลือ',
+   'ปลดหนี้ก่อนลงทุน ดอกเบี้ยหนี้มักสูงกว่าผลตอบแทนที่คาดหวัง การโปะหนี้คือผลตอบแทนที่การันตี',
+   'บันทึกทุกบาทที่ออมและลงทุน สมุดบันทึกคือกระจกสะท้อนวินัย เดือนไหนพลาดให้ถามตัวเองว่าเงินไปไหน'],
+  fund:'<em>เรียงลำดับ:</em> 1) เงินสำรอง 6-12 เดือน 2) ประกันสุขภาพ 3) ปลดหนี้ดอกสูง 4) ลงทุนสม่ำเสมอในสิ่งที่เข้าใจ'}
+];
+const state={};
+function renderGurus(){
+  const m=now.getMonth();
+  el('guruGrid').innerHTML=GURUS.map(g=>`<div class="guru ${g.color}">
+    <div class="head"><div class="gav">${g.init}</div><div><b>${g.name}</b><span>${g.sub}</span></div></div>
+    <div class="quote" id="q-${g.id}">${g.advice[m%g.advice.length]}</div>
+    <div class="fundrec">${g.fund}</div>
+    <button class="btn sm" onclick="nextAdvice('${g.id}')">ขอคำแนะนำใหม่ ✦</button></div>`).join('');
+}
+function nextAdvice(id){
+  const g=GURUS.find(x=>x.id===id);
+  state[id]=((state[id]??now.getMonth())+1)%g.advice.length;
+  const q=el('q-'+id); q.style.opacity=0;
+  setTimeout(()=>{q.textContent=g.advice[state[id]];q.style.opacity=1},180);
+}
+
+function logKey(){return 'mp_log_'+(D?D.name:'x')}
+function getLog(){try{return JSON.parse(localStorage.getItem(logKey()))||[]}catch(e){return[]}}
+function saveLog(d){localStorage.setItem(logKey(),JSON.stringify(d))}
+function addLog(){
+  const m=el('logMonth').value,c=el('logCat').value,a=+el('logAmt').value;
+  if(!m||!a||a<=0){alert('กรุณาเลือกเดือนและใส่จำนวนเงิน');return;}
+  const d=getLog();d.push({m,c,a,id:Date.now()});saveLog(d);el('logAmt').value='';renderLog();
+}
+function delLog(id){saveLog(getLog().filter(x=>x.id!==id));renderLog();}
+function thMonth(m){
+  const[y,mm]=m.split('-');
+  const names=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return names[+mm-1]+' '+(+y+543);
+}
+function renderLog(){
+  const d=getLog().sort((x,y)=>x.m.localeCompare(y.m)||x.id-y.id);
+  const byM={};d.forEach(x=>{(byM[x.m]=byM[x.m]||[]).push(x)});
+  const months=Object.keys(byM).sort();
+  let html='<tr><th>เดือน</th><th>รายการ</th><th style="text-align:right">จำนวนเงิน</th><th></th></tr>',all=0;
+  months.forEach(m=>{
+    let s=0;
+    byM[m].forEach(x=>{s+=x.a;html+=`<tr><td>${thMonth(m)}</td><td>${x.c}</td><td style="text-align:right">${fmt(x.a)}</td><td><button class="xdel" style="padding-top:0" onclick="delLog(${x.id})">✕</button></td></tr>`});
+    all+=s; html+=`<tr class="msum"><td colspan="2">รวม ${thMonth(m)}</td><td style="text-align:right">${fmt(s)}</td><td></td></tr>`;
+  });
+  el('logTable').innerHTML=months.length?html:'<tr><td style="color:var(--sub)">ยังไม่มีบันทึก — เลือกเดือน เลือกรายการ ใส่จำนวนเงิน แล้วกดบันทึก</td></tr>';
+  const target=Math.max(window._save||0,1);
+  if(months.length){
+    const lastM=months[months.length-1],lastSum=byM[lastM].reduce((s,x)=>s+x.a,0);
+    el('sumThis').textContent=fmt(lastSum)+' ฿';
+    const pct=lastSum/target*100;
+    el('sumPct').textContent=pct.toFixed(0)+'%';
+    el('sumPct').className=pct>=100?'statusgood':'statusbad';
+    el('sumAll').textContent=fmt(all)+' ฿';
+  }else{el('sumThis').textContent='—';el('sumPct').textContent='—';el('sumAll').textContent='—';}
+}
+
+function exportFile(){
+  const html=document.documentElement.outerHTML.replace('</body>',
+    `<script>window.addEventListener('load',function(){try{localStorage.setItem('${KEY}',${JSON.stringify(JSON.stringify(D))});}catch(e){}});<\/script></body>`);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+  a.download='MoneyPlan_'+D.name+'.html'; a.click();
+}
+
+(function init(){
+  const raw=localStorage.getItem(KEY);
+  if(raw){
+    try{
+      const d=JSON.parse(raw);
+      el('f_name').value=d.name;el('f_job').value=d.job;el('f_by').value=d.by;el('f_ret').value=d.ret;
+      el('f_end').value=d.end;el('f_workend').value=d.workend;el('f_retspend').value=d.retspend;
+      el('f_port').value=d.port;el('f_debt').value=d.debt;el('f_payoff').value=d.payoff||3;
+      el('f_pen').value=d.pen;el('f_penage').value=d.penage;
+      incRows=d.inc||[];expRows=d.exp||[];assetRows=d.assets||[];bigRows=d.big||[];risk=d.risk||3.5;
+      document.querySelectorAll('#riskChips .chip').forEach(c=>c.classList.toggle('on',+c.dataset.r===risk));
+      renderRows('inc');renderRows('exp');renderAssets();renderBig();
+      el('f_by').dispatchEvent(new Event('input'));
+      D=d; renderDash(); return;
+    }catch(e){}
+  }
+  addRow('inc','',''); addRow('exp','','');
+})();
+</script>
+</body>
+</html>
