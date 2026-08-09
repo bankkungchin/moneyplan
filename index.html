@@ -43,9 +43,11 @@ input:focus,select:focus{outline:none;border-color:var(--purple-deep)}
 .btn.big{width:100%;padding:16px;font-size:16px;border-radius:20px}
 .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
 .btn.sm{padding:8px 14px;font-size:13px;border-radius:13px}
-.rowline{display:grid;grid-template-columns:1fr 130px 40px;gap:8px;align-items:start}
-.rowline3{display:grid;grid-template-columns:1fr 90px 130px 40px;gap:8px;align-items:start}
-.rowline input,.rowline3 input{margin-bottom:8px}
+.rowline{display:grid;grid-template-columns:1fr 120px 86px 34px;gap:7px;align-items:start}
+.rowline3{display:grid;grid-template-columns:1fr 86px 130px 34px;gap:7px;align-items:start}
+.rowline input,.rowline3 input,.rowline select{margin-bottom:8px}
+.rowline select{padding:11px 6px;font-size:13.5px}
+@media(max-width:560px){.rowline{grid-template-columns:1fr 1fr 86px 34px}.rowline3{grid-template-columns:1fr 1fr 86px 34px}}
 .xdel{border:none;background:transparent;color:var(--sub);cursor:pointer;font-size:17px;padding-top:10px}
 .metric{background:var(--card);border-radius:22px;padding:16px}
 .metric span{font-size:12.5px;color:var(--sub);font-weight:600}
@@ -144,22 +146,22 @@ table.log tr.msum td{background:rgba(124,92,224,.1);font-weight:800}
 
 <div class="card">
   <h2 class="sec" style="margin-top:0">2. รายได้ต่อเดือน (สุทธิหลังภาษี)</h2>
-  <div class="fhint" style="margin-bottom:10px">รายได้ไม่แน่นอน (ขายผลผลิต/ค่าเช่า/รับจ้าง) ให้ใส่ค่าเฉลี่ยทั้งปีหารด้วย 12</div>
+  <div class="fhint" style="margin-bottom:10px">เลือกได้ว่าเป็น <b>/เดือน</b> หรือ <b>/ปี</b> — ดอกเบี้ยหุ้นกู้ พันธบัตร เงินฝาก หรือสวนผลไม้ที่ขายปีละครั้ง ใส่แบบ /ปี ได้เลย ระบบเฉลี่ยให้เอง</div>
   <div id="incList"></div>
   <button class="btn ghost sm" onclick="addRow('inc')">+ เพิ่มรายการรายได้</button>
-  <div style="margin-top:14px;font-weight:800;font-size:15px">รวมรายได้: <span id="incSum">0</span> บาท/เดือน</div>
+  <div style="margin-top:14px;font-weight:800;font-size:15px">รวมรายได้: <span id="incSum">0</span> บาท/เดือน <span style="font-weight:600;color:var(--sub);font-size:13px">(<span id="incSumY">0</span> บาท/ปี)</span></div>
   <label class="fl" style="margin-top:16px">รายได้จากการทำงานนี้จะได้ถึงอายุเท่าไหร่</label>
   <input type="number" id="f_workend" value="60">
 </div>
 
 <div class="card">
-  <h2 class="sec" style="margin-top:0">3. ค่าใช้จ่ายต่อเดือน</h2>
-  <div class="fhint" style="margin-bottom:10px">ใส่ให้ครบตามจริง รวมค่าผ่อนหนี้ เบี้ยประกัน ค่าดูแลพ่อแม่ ค่าเทอมลูก — ตัวเลขที่ต่ำกว่าจริงทำให้แผนดูดีเกินจริง</div>
+  <h2 class="sec" style="margin-top:0">3. ค่าใช้จ่าย</h2>
+  <div class="fhint" style="margin-bottom:10px">ใส่ให้ครบตามจริง รวมค่าผ่อนหนี้ ค่าดูแลพ่อแม่ ค่าเทอมลูก — ตัวเลขที่ต่ำกว่าจริงทำให้แผนดูดีเกินจริง · รายการที่จ่ายปีละครั้ง (เบี้ยประกัน ถ่ายน้ำมันเครื่อง ตรวจสุขภาพ ค่าทำสวน) เลือก <b>/ปี</b> ได้เลย</div>
   <div id="expList"></div>
   <button class="btn ghost sm" onclick="addRow('exp')">+ เพิ่มรายการค่าใช้จ่าย</button>
-  <div style="margin-top:14px;font-weight:800;font-size:15px">รวมค่าใช้จ่าย: <span id="expSum">0</span> บาท/เดือน</div>
+  <div style="margin-top:14px;font-weight:800;font-size:15px">รวมค่าใช้จ่าย: <span id="expSum">0</span> บาท/เดือน <span style="font-weight:600;color:var(--sub);font-size:13px">(<span id="expSumY">0</span> บาท/ปี)</span></div>
   <label class="fl" style="margin-top:16px">หลังเกษียณคาดว่าจะใช้เดือนละเท่าไหร่ (ค่าเงินวันนี้)</label>
-  <input type="number" id="f_retspend" placeholder="เช่น 30000">
+  <input type="text" inputmode="numeric" id="f_retspend" placeholder="เช่น 30,000" oninput="moneyIn(this)">
   <div class="fhint">ปกติ 60-80% ของวันนี้ — หักค่าผ่อนหนี้ที่จะหมดและค่าเลี้ยงลูกที่จะโตแล้ว</div>
 </div>
 
@@ -172,12 +174,20 @@ table.log tr.msum td{background:rgba(124,92,224,.1);font-weight:800}
 </div>
 
 <div class="card">
-  <h2 class="sec" style="margin-top:0">5. สินทรัพย์และหนี้สิน</h2>
+  <h2 class="sec" style="margin-top:0">5. รายได้ก้อนใหญ่ครั้งเดียว</h2>
+  <div class="fhint" style="margin-bottom:10px">เงินก้อนที่จะได้รับในอนาคต — RMF/Thai ESG ครบกำหนด กองทุนสำรองเลี้ยงชีพตอนออกจากงาน เงินชดเชยเกษียณ ประกันสะสมทรัพย์ครบสัญญา มรดก ขายที่ดิน · ใส่จำนวนที่คาดว่าจะได้รับจริงในปีนั้น (ไม่ต้องปรับเงินเฟ้อ)</div>
+  <div id="winList"></div>
+  <button class="btn ghost sm" onclick="addWin()">+ เพิ่มรายได้ก้อนใหญ่</button>
+  <div style="margin-top:12px;font-weight:800;font-size:15px">รวม: <span id="winSum">0</span> บาท</div>
+</div>
+
+<div class="card">
+  <h2 class="sec" style="margin-top:0">6. สินทรัพย์และหนี้สิน</h2>
   <label class="fl">เงินลงทุน + เงินฝากที่มีตอนนี้ (บาท)</label>
-  <input type="number" id="f_port" placeholder="เช่น 500000">
+  <input type="text" inputmode="numeric" id="f_port" placeholder="เช่น 500,000" oninput="moneyIn(this)">
   <div class="fhint">เงินสด เงินฝาก กองทุน หุ้น ทอง — ไม่รวมที่ดิน/บ้าน</div>
   <label class="fl">หนี้สินคงเหลือทั้งหมด (บาท)</label>
-  <input type="number" id="f_debt" value="0">
+  <input type="text" inputmode="numeric" id="f_debt" value="0" oninput="moneyIn(this)">
   <label class="fl">ตั้งใจปลดหนี้ให้หมดภายในกี่ปี</label>
   <input type="number" id="f_payoff" value="3">
 
@@ -237,6 +247,11 @@ table.log tr.msum td{background:rgba(124,92,224,.1);font-weight:800}
 <details class="drop" id="bigDrop">
   <summary>💥 ค่าใช้จ่ายก้อนใหญ่<span><span id="bigCount">0</span> รายการ ▼</span></summary>
   <div class="body" id="bigSliders"></div>
+</details>
+
+<details class="drop" id="winDrop">
+  <summary>💵 รายได้ก้อนใหญ่<span><span id="winCount">0</span> รายการ ▼</span></summary>
+  <div class="body" id="winSliders"></div>
 </details>
 
 <h2 class="sec">เส้นทางพอร์ตการเงิน</h2>
@@ -308,19 +323,28 @@ function toggleMode(){
 }
 el('modeBtn').onclick=toggleMode;
 
-let incRows=[],expRows=[],assetRows=[],bigRows=[],risk=3.5,D=null;
+let incRows=[],expRows=[],assetRows=[],bigRows=[],winRows=[],risk=3.5,D=null;
 const KEY='mp_builder_profile';
 
-function addRow(kind,name='',amt=''){
-  (kind==='inc'?incRows:expRows).push({id:Date.now()+Math.random(),name,amt});
+const num=v=>+String(v??'').replace(/[^\d.]/g,'')||0;
+const M=v=>{const n=String(v??'').replace(/[^\d]/g,'');return n?(+n).toLocaleString('en-US'):''};
+function moneyIn(inp){const raw=inp.value.replace(/[^\d]/g,'');inp.value=raw?(+raw).toLocaleString('en-US'):'';}
+function setMoney(id,v){el(id).value=v?(+v).toLocaleString('en-US'):''}
+const monthly=r=>r.unit==='y'?num(r.amt)/12:num(r.amt);
+
+function addRow(kind,name='',amt='',unit='m'){
+  (kind==='inc'?incRows:expRows).push({id:Date.now()+Math.random(),name,amt,unit});
   renderRows(kind);
 }
 function renderRows(kind){
   const arr=kind==='inc'?incRows:expRows;
-  const ph=kind==='inc'?'เช่น ขายผลผลิต':'เช่น ค่ากินอยู่';
+  const ph=kind==='inc'?'เช่น ค่าเช่า':'เช่น ค่ากินอยู่';
   el(kind==='inc'?'incList':'expList').innerHTML=arr.map(r=>`<div class="rowline">
     <input type="text" placeholder="${ph}" value="${(r.name||'').replace(/"/g,'&quot;')}" oninput="upd('${kind}','${r.id}','name',this.value)">
-    <input type="number" placeholder="บาท/เดือน" value="${r.amt}" oninput="upd('${kind}','${r.id}','amt',this.value)">
+    <input type="text" inputmode="numeric" placeholder="บาท" value="${M(r.amt)}" oninput="moneyIn(this);upd('${kind}','${r.id}','amt',this.value)">
+    <select onchange="upd('${kind}','${r.id}','unit',this.value)">
+      <option value="m"${r.unit!=='y'?' selected':''}>/เดือน</option>
+      <option value="y"${r.unit==='y'?' selected':''}>/ปี</option></select>
     <button class="xdel" onclick="delRow('${kind}','${r.id}')">✕</button></div>`).join('');
   sums();
 }
@@ -333,8 +357,9 @@ function delRow(kind,id){
   renderRows(kind);
 }
 function sums(){
-  el('incSum').textContent=fmt(incRows.reduce((s,r)=>s+(+r.amt||0),0));
-  el('expSum').textContent=fmt(expRows.reduce((s,r)=>s+(+r.amt||0),0));
+  const i=incRows.reduce((s,r)=>s+monthly(r),0), e=expRows.reduce((s,r)=>s+monthly(r),0);
+  el('incSum').textContent=fmt(i); el('expSum').textContent=fmt(e);
+  el('incSumY').textContent=fmt(i*12); el('expSumY').textContent=fmt(e*12);
 }
 function addBig(name='',age='',amt=''){
   bigRows.push({id:Date.now()+Math.random(),name,age,amt});renderBig();
@@ -343,12 +368,25 @@ function renderBig(){
   el('bigList').innerHTML=bigRows.map(r=>`<div class="rowline3">
     <input type="text" placeholder="เช่น ค่าเทอมมหาลัยลูก" value="${(r.name||'').replace(/"/g,'&quot;')}" oninput="updB('${r.id}','name',this.value)">
     <input type="number" placeholder="ตอนอายุ" value="${r.age}" oninput="updB('${r.id}','age',this.value)">
-    <input type="number" placeholder="บาท" value="${r.amt}" oninput="updB('${r.id}','amt',this.value)">
+    <input type="text" inputmode="numeric" placeholder="บาท" value="${M(r.amt)}" oninput="moneyIn(this);updB('${r.id}','amt',this.value)">
     <button class="xdel" onclick="delB('${r.id}')">✕</button></div>`).join('');
-  el('bigSum').textContent=fmt(bigRows.reduce((s,r)=>s+(+r.amt||0),0));
+  el('bigSum').textContent=fmt(bigRows.reduce((s,r)=>s+num(r.amt),0));
 }
-function updB(id,f,v){const r=bigRows.find(x=>String(x.id)===String(id));if(r){r[f]=v;el('bigSum').textContent=fmt(bigRows.reduce((s,x)=>s+(+x.amt||0),0));}}
+function updB(id,f,v){const r=bigRows.find(x=>String(x.id)===String(id));if(r){r[f]=v;el('bigSum').textContent=fmt(bigRows.reduce((s,x)=>s+num(x.amt),0));}}
 function delB(id){bigRows=bigRows.filter(x=>String(x.id)!==String(id));renderBig();}
+function addWin(name='',age='',amt=''){
+  winRows.push({id:Date.now()+Math.random(),name,age,amt});renderWin();
+}
+function renderWin(){
+  el('winList').innerHTML=winRows.map(r=>`<div class="rowline3">
+    <input type="text" placeholder="เช่น RMF ครบกำหนด" value="${(r.name||'').replace(/"/g,'&quot;')}" oninput="updW('${r.id}','name',this.value)">
+    <input type="number" placeholder="ตอนอายุ" value="${r.age}" oninput="updW('${r.id}','age',this.value)">
+    <input type="text" inputmode="numeric" placeholder="บาท" value="${M(r.amt)}" oninput="moneyIn(this);updW('${r.id}','amt',this.value)">
+    <button class="xdel" onclick="delW('${r.id}')">✕</button></div>`).join('');
+  el('winSum').textContent=fmt(winRows.reduce((s,r)=>s+num(r.amt),0));
+}
+function updW(id,f,v){const r=winRows.find(x=>String(x.id)===String(id));if(r){r[f]=v;el('winSum').textContent=fmt(winRows.reduce((s,x)=>s+num(x.amt),0));}}
+function delW(id){winRows=winRows.filter(x=>String(x.id)!==String(id));renderWin();}
 function addAsset(name='',val='',rent='',sell=false,sellage=''){
   assetRows.push({id:Date.now()+Math.random(),name,val,rent,sell,sellage});renderAssets();
 }
@@ -358,8 +396,8 @@ function renderAssets(){
       <input type="text" placeholder="เช่น ที่ดิน 10 ไร่" value="${(r.name||'').replace(/"/g,'&quot;')}" style="margin-bottom:0" oninput="updA('${r.id}','name',this.value)">
       <button class="xdel" onclick="delA('${r.id}')" style="padding-top:0">✕</button></div>
     <div class="grid two" style="gap:8px">
-      <div><label class="fl" style="font-size:12px">มูลค่าประเมิน (บาท)</label><input type="number" value="${r.val}" oninput="updA('${r.id}','val',this.value)"></div>
-      <div><label class="fl" style="font-size:12px">รายได้/ค่าเช่า (บาท/เดือน)</label><input type="number" value="${r.rent}" oninput="updA('${r.id}','rent',this.value)"></div>
+      <div><label class="fl" style="font-size:12px">มูลค่าประเมิน (บาท)</label><input type="text" inputmode="numeric" value="${M(r.val)}" oninput="moneyIn(this);updA('${r.id}','val',this.value)"></div>
+      <div><label class="fl" style="font-size:12px">รายได้/ค่าเช่า (บาท/เดือน)</label><input type="text" inputmode="numeric" value="${M(r.rent)}" oninput="moneyIn(this);updA('${r.id}','rent',this.value)"></div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;font-size:13px;font-weight:700">
       <input type="checkbox" ${r.sell?'checked':''} onchange="updA('${r.id}','sell',this.checked)" style="width:17px;height:17px">
@@ -381,15 +419,17 @@ el('f_by').addEventListener('input',()=>{
 
 function loadDemo(){
   el('f_name').value='เอก';el('f_job').value='วิศวกร';el('f_by').value=2524;el('f_ret').value=60;el('f_end').value=90;
-  el('f_workend').value=60;el('f_retspend').value=40000;el('f_port').value=1200000;el('f_debt').value=1500000;
-  el('f_payoff').value=5;el('f_pen').value=12000;el('f_penage').value=60;
-  incRows=[];expRows=[];assetRows=[];bigRows=[];
-  addRow('inc','เงินเดือนสุทธิ',75000); addRow('inc','โบนัสเฉลี่ยต่อเดือน',15000);
-  addRow('exp','ค่ากินอยู่ในบ้าน',20000); addRow('exp','ผ่อนบ้าน',18000);
-  addRow('exp','ค่าเทอมลูก',8000); addRow('exp','ค่ารถ + น้ำมัน',7000);
-  addRow('exp','เบี้ยประกันสุขภาพ/ชีวิต',6000);
+  el('f_workend').value=60;el('f_payoff').value=5;el('f_pen').value=12000;el('f_penage').value=60;
+  setMoney('f_retspend',40000);setMoney('f_port',1200000);setMoney('f_debt',1500000);
+  incRows=[];expRows=[];assetRows=[];bigRows=[];winRows=[];
+  addRow('inc','เงินเดือนสุทธิ',75000,'m'); addRow('inc','โบนัสประจำปี',180000,'y');
+  addRow('inc','ดอกเบี้ยหุ้นกู้ + เงินฝาก',36000,'y');
+  addRow('exp','ค่ากินอยู่ในบ้าน',20000,'m'); addRow('exp','ผ่อนบ้าน',18000,'m');
+  addRow('exp','ค่าเทอมลูก',8000,'m'); addRow('exp','ค่ารถ + น้ำมัน',7000,'m');
+  addRow('exp','เบี้ยประกันสุขภาพ/ชีวิต',72000,'y'); addRow('exp','ตรวจสุขภาพ + ต่อ พรบ./ประกันรถ',25000,'y');
   addAsset('คอนโดปล่อยเช่า',2000000,9000,false,''); addAsset('ที่ดินเปล่าต่างจังหวัด',800000,0,false,'');
   addBig('ค่าเทอมมหาวิทยาลัยลูก',50,400000); addBig('เปลี่ยนรถ',55,700000);
+  addWin('กองทุนสำรองเลี้ยงชีพ (PVD)',60,2500000); addWin('RMF ครบกำหนด',60,1500000);
   el('f_by').dispatchEvent(new Event('input'));
   alert('ใส่ตัวอย่าง "นาย เอก วิศวกร" ให้แล้ว — แก้เป็นของตัวเองได้เลย แล้วกดสร้าง dashboard');
 }
@@ -402,8 +442,8 @@ function collect(){
   return {name:el('f_name').value||'คุณ', job:el('f_job').value||'',
     age:(by>2400&&by<2600)?(2569-by):45, by,
     ret:+el('f_ret').value||60, end:+el('f_end').value||90, workend:+el('f_workend').value||60,
-    risk, inc:incRows, exp:expRows, assets:assetRows, big:bigRows,
-    retspend:+el('f_retspend').value||0, port:+el('f_port').value||0, debt:+el('f_debt').value||0,
+    risk, inc:incRows, exp:expRows, assets:assetRows, big:bigRows, win:winRows,
+    retspend:num(el('f_retspend').value), port:num(el('f_port').value), debt:num(el('f_debt').value),
     payoff:Math.max(+el('f_payoff').value||1,1), pen:+el('f_pen').value||0, penage:+el('f_penage').value||60};
 }
 function build(){
@@ -419,24 +459,31 @@ function renderDash(){
   el('avatarBox').textContent=D.name.slice(0,2);
   el('titleBox').textContent='สวัสดี, '+D.name;
   el('dHead').innerHTML='ภารกิจเกษียณ '+D.ret+'<br>ใช้เงินถึงอายุ '+D.end;
-  const incTot=D.inc.reduce((s,r)=>s+(+r.amt||0),0);
-  const expTot=D.exp.reduce((s,r)=>s+(+r.amt||0),0);
+  const incTot=Math.round(D.inc.reduce((s,r)=>s+monthly(r),0));
+  const expTot=Math.round(D.exp.reduce((s,r)=>s+monthly(r),0));
   const set=(id,v,mx)=>{const s=el(id);s.max=Math.max(mx,(v||0)*2||10000);s.value=v;};
   set('s_inc',incTot,200000); set('s_exp',expTot,200000); set('s_rspend',D.retspend,200000);
   el('s_ret').value=D.ret; el('s_pen').value=D.pen; el('s_pen').max=Math.max(60000,D.pen*2); el('s_r').value=D.risk;
   el('assetSliders').innerHTML=D.assets.length?D.assets.map((a,i)=>
     `<div class="slider-row"><label>🏞️ ${a.name||'สินทรัพย์ '+(i+1)}</label>
-     <input type="range" class="asl" id="as_${i}" min="0" max="${Math.max(50000,(+a.rent||0)*3)}" step="500" value="${+a.rent||0}"><output id="aso_${i}">${fmt(a.rent)}</output></div>
-     <div class="hint">มูลค่า ${fmt(a.val)} บาท${a.sell?(' · ตั้งใจขายตอนอายุ '+(a.sellage||D.ret)):((+a.rent||0)===0?' · ยังไม่สร้างรายได้ ลากดูว่าถ้าปล่อยเช่าได้จะเปลี่ยนแผนแค่ไหน':'')}
+     <input type="range" class="asl" id="as_${i}" min="0" max="${Math.max(50000,num(a.rent)*3)}" step="500" value="${num(a.rent)}"><output id="aso_${i}">${fmt(num(a.rent))}</output></div>
+     <div class="hint">มูลค่า ${fmt(num(a.val))} บาท${a.sell?(' · ตั้งใจขายตอนอายุ '+(a.sellage||D.ret)):(num(a.rent)===0?' · ยังไม่สร้างรายได้ ลากดูว่าถ้าปล่อยเช่าได้จะเปลี่ยนแผนแค่ไหน':'')}
      <label style="display:inline-flex;gap:5px;align-items:center;margin-left:8px;width:auto"><input type="checkbox" class="asell" id="asell_${i}" ${a.sell?'checked':''} style="width:15px;height:15px">ขาย</label></div>`
   ).join(''):'<div class="hint" style="margin-left:0">ยังไม่ได้ใส่สินทรัพย์ — กดแก้ไขข้อมูลเพื่อเพิ่ม</div>';
   el('bigCount').textContent=D.big.length;
   el('bigSliders').innerHTML=D.big.length?D.big.map((b,i)=>
     `<div class="slider-row"><label>💥 ${b.name||'รายการ '+(i+1)} (อายุ ${b.age||'-'})</label>
-     <input type="range" class="bsl" id="bs_${i}" min="0" max="${Math.max(500000,(+b.amt||0)*2)}" step="10000" value="${+b.amt||0}"><output id="bso_${i}">${fmt(b.amt)}</output></div>`
+     <input type="range" class="bsl" id="bs_${i}" min="0" max="${Math.max(500000,num(b.amt)*2)}" step="10000" value="${num(b.amt)}"><output id="bso_${i}">${fmt(num(b.amt))}</output></div>`
   ).join(''):'<div class="hint" style="margin-left:0">ยังไม่ได้ใส่ค่าใช้จ่ายก้อนใหญ่ — กดแก้ไขข้อมูลเพื่อเพิ่ม (ค่าเทอมลูก เปลี่ยนรถ ซ่อมบ้าน)</div>';
+  D.win=D.win||[];
+  el('winCount').textContent=D.win.length;
+  el('winSliders').innerHTML=D.win.length?D.win.map((w,i)=>
+    `<div class="slider-row"><label>💵 ${w.name||'รายการ '+(i+1)} (อายุ ${w.age||'-'})</label>
+     <input type="range" class="wsl" id="ws_${i}" min="0" max="${Math.max(1000000,num(w.amt)*2)}" step="50000" value="${num(w.amt)}"><output id="wso_${i}">${fmt(num(w.amt))}</output></div>`
+  ).join(''):'<div class="hint" style="margin-left:0">ยังไม่ได้ใส่รายได้ก้อนใหญ่ — กดแก้ไขข้อมูลเพื่อเพิ่ม (RMF, กองทุนสำรองเลี้ยงชีพ, เงินชดเชยเกษียณ)</div>';
   D.assets.forEach((a,i)=>{['as_'+i,'asell_'+i].forEach(id=>el(id)&&el(id).addEventListener('input',()=>calc(false)));});
   D.big.forEach((b,i)=>{const s=el('bs_'+i);if(s)s.addEventListener('input',()=>calc(false));});
+  D.win.forEach((w,i)=>{const s=el('ws_'+i);if(s)s.addEventListener('input',()=>calc(false));});
   ['s_inc','s_exp','s_rspend','s_ret','s_pen','s_r','s_inf','s_shock','s_drag'].forEach(i=>el(i).addEventListener('input',()=>calc(false)));
   el('logMonth').value=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   renderLog(); renderGurus(); calc(true);
@@ -455,6 +502,7 @@ function project(o,stress){
     const income=(working?o.inc*12:0)+(age>=D.penage?o.pen*12:0);
     let big=0;
     o.big.forEach(b=>{ if(+b.age===age) big+=b.amt*Math.pow(1+o.inf,t); });
+    o.win.forEach(w=>{ if(+w.age===age) bal+=w.amt; });
     const dp=(t<D.payoff)?D.debt/D.payoff:0;
     o.assets.forEach(a=>{ if(a.sell&&+a.sellage===age) bal+=a.val*Math.pow(1+G,t); });
     let r=o.r;
@@ -473,9 +521,10 @@ let chart=null;
 function calc(rebuild){
   const o={inc:+el('s_inc').value, exp:+el('s_exp').value, rspend:+el('s_rspend').value,
     ret:+el('s_ret').value, pen:+el('s_pen').value, r:+el('s_r').value/100, inf:+el('s_inf').value/100,
-    assets:D.assets.map((a,i)=>({rent:+(el('as_'+i)?.value||0), val:+a.val||0,
+    assets:D.assets.map((a,i)=>({rent:+(el('as_'+i)?.value||0), val:num(a.val),
       sell:el('asell_'+i)?el('asell_'+i).checked:!!a.sell, sellage:+(a.sellage||el('s_ret').value)})),
-    big:D.big.map((b,i)=>({age:+b.age||0, amt:+(el('bs_'+i)?.value||0)}))};
+    big:D.big.map((b,i)=>({age:+b.age||0, amt:+(el('bs_'+i)?.value||0)})),
+    win:(D.win||[]).map((w,i)=>({age:+w.age||0, amt:+(el('ws_'+i)?.value||0)}))};
   el('o_inc').textContent=fmt(o.inc);el('o_exp').textContent=fmt(o.exp);el('o_rspend').textContent=fmt(o.rspend);
   el('o_ret').textContent=o.ret;el('o_pen').textContent=fmt(o.pen);
   el('o_r').textContent=(o.r*100).toFixed(2).replace(/0+$/,'').replace(/\.$/,'')+'%';
@@ -485,6 +534,7 @@ function calc(rebuild){
   let rent=0;
   o.assets.forEach((a,i)=>{rent+=a.rent; if(el('aso_'+i))el('aso_'+i).textContent=fmt(a.rent);});
   o.big.forEach((b,i)=>{if(el('bso_'+i))el('bso_'+i).textContent=fmt(b.amt);});
+  o.win.forEach((w,i)=>{if(el('wso_'+i))el('wso_'+i).textContent=fmt(w.amt);});
   el('rentTotal').textContent=fmt(rent);
 
   const save=o.inc+rent-o.exp;
@@ -536,13 +586,14 @@ function calc(rebuild){
 
 function renderNoti(o,base,bad,rent,save){
   const expTot=o.exp;
-  const idle=D.assets.filter((a,i)=>o.assets[i].rent===0&&(+a.val||0)>0);
+  const idle=D.assets.filter((a,i)=>o.assets[i].rent===0&&num(a.val)>0);
   const risky=(D.job||'').match(/เกษตร|ค้า|อิสระ|ขาย|รับจ้าง|ฟรีแลนซ์/);
   const n=[];
   n.push(['💰','var(--orange)','เงินสำรองฉุกเฉิน','เป้า '+fmt(expTot*(risky?12:6))+' บาท ('+(risky?12:6)+' เดือนของค่าใช้จ่าย)'+(risky?' — อาชีพรายได้ไม่แน่นอนควรมีหนากว่าปกติ':'')+' · ปัจจุบันมีพอร์ตรวม '+fmt(D.port)+' บาท']);
   if(D.debt>0)n.push(['🏦','var(--red)','ปลดหนี้ '+fmt(D.debt)+' บาท ใน '+D.payoff+' ปี','ดอกเบี้ยหนี้มักสูงกว่าผลตอบแทนการลงทุน — โปะหนี้คือการลงทุนที่การันตีผลตอบแทน']);
   if(D.big.length)n.push(['💥','var(--purple)','ค่าใช้จ่ายก้อนใหญ่ '+D.big.length+' รายการ',D.big.map(b=>b.name+' (อายุ '+b.age+')').join(' · ')+' — เตรียมเงินก้อนแยกไว้ก่อนถึงเวลา อย่าดึงจากพอร์ตหลักตอนตลาดแย่']);
-  if(idle.length)n.push(['🏞️','var(--green)','สินทรัพย์ที่ยังไม่สร้างรายได้ '+idle.length+' รายการ',idle.map(a=>a.name).join(', ')+' มูลค่ารวม '+fmt(idle.reduce((s,a)=>s+(+a.val||0),0))+' บาท — ให้เช่า ทำประโยชน์ หรือขายมาลงทุน']);
+  if((D.win||[]).length)n.push(['💵','var(--blue)','รายได้ก้อนใหญ่ '+D.win.length+' รายการ รวม '+fmt(o.win.reduce((s,w)=>s+w.amt,0))+' บาท',D.win.map(w=>w.name+' (อายุ '+w.age+')').join(' · ')+' — เงินก้อนใหญ่ที่เข้ามาทีเดียว ควรทยอยลงทุน (DCA) 6-12 เดือน อย่าเทเข้าครั้งเดียว และระวังภาษีตอนรับเงิน']);
+  if(idle.length)n.push(['🏞️','var(--green)','สินทรัพย์ที่ยังไม่สร้างรายได้ '+idle.length+' รายการ',idle.map(a=>a.name).join(', ')+' มูลค่ารวม '+fmt(idle.reduce((s,a)=>s+num(a.val),0))+' บาท — ให้เช่า ทำประโยชน์ หรือขายมาลงทุน']);
   if(save<=0)n.push(['⚠️','var(--red)','รายจ่ายมากกว่ารายได้','ติดลบเดือนละ '+fmt(Math.abs(save))+' บาท — ต้องแก้ก่อนเรื่องลงทุนใดๆ']);
   else n.push(['✅','var(--green)','ออมได้เดือนละ '+fmt(save)+' บาท','คิดเป็น '+(o.inc+rent?Math.round(save/(o.inc+rent)*100):0)+'% ของรายได้ — เกณฑ์ที่ดีคือ 20% ขึ้นไป']);
   if(bad.runout)n.push(['📉','var(--orange)','กรณีตลาดแย่: เงินหมดตอนอายุ '+bad.runout,'ต่างจากกรณีปกติ '+(base.runout?(bad.runout-base.runout)*-1*-1:D.end-bad.runout)+' ปี — ทางแก้คือถือเงินสด+ตราสารหนี้ 2-3 ปีของค่าใช้จ่ายไว้ก่อนเกษียณ จะได้ไม่ต้องขายสินทรัพย์ตอนราคาต่ำ']);
@@ -643,12 +694,12 @@ function exportFile(){
     try{
       const d=JSON.parse(raw);
       el('f_name').value=d.name;el('f_job').value=d.job;el('f_by').value=d.by;el('f_ret').value=d.ret;
-      el('f_end').value=d.end;el('f_workend').value=d.workend;el('f_retspend').value=d.retspend;
-      el('f_port').value=d.port;el('f_debt').value=d.debt;el('f_payoff').value=d.payoff||3;
+      el('f_end').value=d.end;el('f_workend').value=d.workend;el('f_payoff').value=d.payoff||3;
+      setMoney('f_retspend',d.retspend);setMoney('f_port',d.port);setMoney('f_debt',d.debt);
       el('f_pen').value=d.pen;el('f_penage').value=d.penage;
-      incRows=d.inc||[];expRows=d.exp||[];assetRows=d.assets||[];bigRows=d.big||[];risk=d.risk||3.5;
+      incRows=d.inc||[];expRows=d.exp||[];assetRows=d.assets||[];bigRows=d.big||[];winRows=d.win||[];risk=d.risk||3.5;
       document.querySelectorAll('#riskChips .chip').forEach(c=>c.classList.toggle('on',+c.dataset.r===risk));
-      renderRows('inc');renderRows('exp');renderAssets();renderBig();
+      renderRows('inc');renderRows('exp');renderAssets();renderBig();renderWin();
       el('f_by').dispatchEvent(new Event('input'));
       D=d; renderDash(); return;
     }catch(e){}
